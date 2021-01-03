@@ -3,7 +3,8 @@ const path = require('path');
 const hbs = require('express-handlebars');
 
 const app = express();
-
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.engine('hbs', hbs({ extname: 'hbs', layoutsDir: './layouts', defaultLayout: 'main' }));
 app.set('view engine', '.hbs');
 
@@ -32,6 +33,23 @@ app.get('/info', (req, res) => {
 
 app.get('/history', (req, res) => {
   res.render('history');
+});
+
+app.post('/contact/send-message', (req, res) => {
+  const { author, sender, title, file, message } = req.body;
+  const allowedExtensions = ['png', 'jpg', 'jpeg', 'gif'];
+  const fileExtension = file.split('.').pop().toLowerCase();
+
+  if(!author || !sender || !title || !file || !message) {
+      res.render('contact', {isError: true});
+  } else {
+      if(allowedExtensions.includes(fileExtension)) {
+          res.render('contact', {isSent: true, file: file});
+      }
+      else {
+          res.render('contact', { file: file, isValid: true });
+      }
+  }
 });
 
 app.use((req, res) => {
